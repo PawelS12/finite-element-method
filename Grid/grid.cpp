@@ -9,13 +9,13 @@ using std::vector;
 
 class Node { // węzły siatki oraz ich współrzędne
     private:
-        int x, y;
+        double x, y;
     public:
         Node() {}
-        Node(int p_x, int p_y) : x(p_x), y(p_y) {}
+        Node(double p_x, double p_y) : x(p_x), y(p_y) {}
 
-        int get_x() { return x; }
-        int get_y() { return y; }
+        double get_x() { return x; }
+        double get_y() { return y; }
 
         void display_node() {
             cout << "(" << x << ", " << y  << ")" << endl;
@@ -49,19 +49,19 @@ class Element { // elementy tworzone przez 4 węzły (obiekty Node)
 
 class Grid { // siatka tworzona z elementów i węzłów
     private:
-        int nN, nE, nW, nH, height, width;
+        double nN, nE, nW, nH, height, width;
         vector<Node> nodes;
         vector<Element> elements;
 
     public:
         Grid() {}
-        Grid(int p_nN, int p_nE, int p_nW, int p_nH, int p_height, int p_width) : nN(p_nN), nE(p_nE), nW(p_nW), nH(p_nH), height(p_height), width(p_width) {
+        Grid(double p_nN, double p_nE, double p_nW, double p_nH, double p_height, double p_width) : nN(p_nN), nE(p_nE), nW(p_nW), nH(p_nH), height(p_height), width(p_width) {
             create_nodes();
             create_elements();
         }
 
         void create_nodes() {
-            double delta_x = width / (nW - 1);  
+            double delta_x = width / (nW - 1);   // odstępy pomiędzy kolejnymi węzłami
             double delta_y = height / (nH - 1); 
 
             for (int i = 0; i < nH; ++i) {
