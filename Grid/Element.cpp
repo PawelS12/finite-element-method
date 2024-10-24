@@ -1,5 +1,8 @@
 #include "Element.h"
 
+using std::cout;
+using std::endl;
+
 Element::Element() {
     for (int i = 0; i < 4; i++) {
         ID[i] = 0;
@@ -15,7 +18,7 @@ void Element::set_ID(int node_1, int node_2, int node_3, int node_4) {
 
 void Element::display_ID() {
     for (int i = 0; i < sizeof(ID) / sizeof(ID[0]); i++) {
-        std::cout << ID[i] << " ";
+        cout << ID[i] << " ";
     }
-    std::cout << std::endl;
+    cout << endl;
 }

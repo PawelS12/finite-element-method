@@ -1,12 +1,15 @@
 #include "Node.h"
 
-Node::Node() {}
+using std::cout;
+using std::endl;
+
+Node::Node() : x(0), y(0) {}
 
 Node::Node(double p_x, double p_y) : x(p_x), y(p_y) {}
 
-double Node::get_x() { return x; }
-double Node::get_y() { return y; }
+double Node::get_x() const { return x; }
+double Node::get_y() const { return y; }
 
-void Node::display_node() {
-    std::cout << "(" << x << ", " << y << ")" << std::endl;
+void Node::display_node() const {
+    cout << "(" << x << ", " << y << ")" << endl;
 }

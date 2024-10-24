@@ -3,13 +3,17 @@
 
 #include <vector>
 #include "Node.h"
+#include "Elem4.h"
 #include "Element.h"
+
+using std::vector;
 
 class Grid {
 private:
     double nN, nE, nW, nH, height, width;
-    std::vector<Node> nodes;
-    std::vector<Element> elements;
+    vector<Node> nodes;
+    vector<Node> nodes_xy;
+    vector<Element> elements;
 
 public:
     Grid();

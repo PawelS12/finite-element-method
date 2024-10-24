@@ -10,9 +10,9 @@ private:
 public:
     Node();
     Node(double p_x, double p_y);
-    double get_x();
-    double get_y();
-    void display_node();
+    double get_x() const;
+    double get_y() const;
+    void display_node() const;
 };
 
 #endif // NODE_H

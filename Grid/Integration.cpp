@@ -14,7 +14,7 @@ const double Integration::w3[3] = { 5.0 / 9.0, 8.0 / 9.0, 5.0 / 9.0 };
 Integration::Integration() {}
 
 void Integration::display_results(double result) {
-    cout << "Result of the integration: " << result << endl << endl;
+    cout << "Result: " << result << endl << endl;
 }
 
 double Integration::gauss_integration_2D(double (*f)(double, double), int n, double a, double b, double c, double d) {

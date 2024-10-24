@@ -1,6 +1,9 @@
 #include "Grid.h"
 #include <iostream>
 
+using std::endl;
+using std::cout;
+
 Grid::Grid() {}
 
 Grid::Grid(double p_nN, double p_nE, double p_nW, double p_nH, double p_height, double p_width) : nN(p_nN), nE(p_nE), nW(p_nW), nH(p_nH), height(p_height), width(p_width) {
@@ -37,16 +40,16 @@ void Grid::create_elements() {
 }
 
 void Grid::display_grid_data() {
-    std::cout << "Nodes: " << std::endl << std::endl;
+    cout << "Nodes: " << endl << endl;
     for (size_t i = 0; i < nodes.size(); i++) {
-        std::cout << "Node " << i + 1 << ": ";
+        cout << "Node " << i + 1 << ": ";
         nodes[i].display_node();
     }
-    std::cout << "-----------------------------------" << std::endl;
-    std::cout << "Elements: " << std::endl << std::endl;
+    cout << "-----------------------------------" << endl;
+    cout << "Elements: " << endl << endl;
     for (size_t i = 0; i < elements.size(); i++) {
-        std::cout << "Element " << i + 1 << ": ";
+        cout << "Element " << i + 1 << ": ";
         elements[i].display_ID();
     }
-    std::cout << "-----------------------------------" << std::endl;
+    cout << "-----------------------------------" << endl;
 }
