@@ -2,10 +2,13 @@
 #define ELEMENT_H
 
 #include <iostream>
+#include <vector>
+
+using std::vector;
 
 class Element {
 private:
-    int ID[4];
+    vector<int> ID;
 
 public:
     Element();

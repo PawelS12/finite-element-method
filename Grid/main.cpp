@@ -4,7 +4,9 @@
 #include "Grid.h"
 #include "Integration.h"
 #include "Elem4.h"
+#include <functional>
 
+using std::function;
 using std::cout;
 using std::endl;
 
@@ -17,7 +19,6 @@ double function_2(double x, double y) {
 }
 
 double integration_points[2] = {-1.0 / sqrt(3), 1.0 / sqrt(3)};
-
 
 int main() {
     GlobalData data;
@@ -34,7 +35,6 @@ int main() {
     double result_2 = integration_1.gauss_integration_2D(function_2, 3, -1, 1, -1, 1);
     cout << "Function: -(2 * pow(x, 2) * y) + (2 * x * y) + 4\n";
     integration_1.display_results(result_2);
-
 
     for (size_t i = 0; i < data.get_elements().size(); ++i) {
         const Elem4& element = data.get_elements()[i]; 
@@ -56,6 +56,12 @@ int main() {
         }
     }
 
+    double conductivity = data.get_conductivity();  
+    cout << "-----------------------------------" << endl;
+    for (size_t i = 0; i < data.get_elements().size(); ++i) {
+        const Elem4& element = data.get_elements()[i];
+        element.calculate_H_matrix(conductivity);
+    }
     
     return 0;
 }

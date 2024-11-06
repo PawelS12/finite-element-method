@@ -36,7 +36,6 @@ public:
     const std::vector<Elem4>& get_elements() const;
     void display_simulation_data();
     void create_elements_from_nodes();
-
 };
 
 #endif // GLOBALDATA_H

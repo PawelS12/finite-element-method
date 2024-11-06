@@ -1,9 +1,12 @@
 #include "Integration.h"
 #include <iostream>
 #include <math.h>
+#include <functional>
 
 using std::cout;
 using std::endl;
+using std::cerr;
+using std::function;
 
 const double Integration::x2[2] = { -1.0 / sqrt(3.0), 1.0 / sqrt(3.0) };
 const double Integration::w2[2] = { 1.0, 1.0 };
@@ -11,13 +14,16 @@ const double Integration::w2[2] = { 1.0, 1.0 };
 const double Integration::x3[3] = { -sqrt(3.0 / 5.0), 0.0, sqrt(3.0 / 5.0) };
 const double Integration::w3[3] = { 5.0 / 9.0, 8.0 / 9.0, 5.0 / 9.0 };
 
+const double Integration::x4[4] = { -sqrt((3.0 + 2.0 * sqrt(6.0 / 5.0)) / 7.0), -sqrt((3.0 - 2.0 * sqrt(6.0 / 5.0)) / 7.0), sqrt((3.0 - 2.0 * sqrt(6.0 / 5.0)) / 7.0), sqrt((3.0 + 2.0 * sqrt(6.0 / 5.0)) / 7.0) };
+const double Integration::w4[4] = { (18.0 - sqrt(30.0)) / 36.0, (18.0 + sqrt(30.0)) / 36.0, (18.0 + sqrt(30.0)) / 36.0, (18.0 - sqrt(30.0)) / 36.0 };
+
 Integration::Integration() {}
 
 void Integration::display_results(double result) {
     cout << "Result: " << result << endl << endl;
 }
 
-double Integration::gauss_integration_2D(double (*f)(double, double), int n, double a, double b, double c, double d) {
+double Integration::gauss_integration_2D(function<double(double, double)> f, int n, double a, double b, double c, double d) {
     double suma = 0.0;
     const double* x; 
     const double* w;
@@ -31,8 +37,12 @@ double Integration::gauss_integration_2D(double (*f)(double, double), int n, dou
             x = x3;
             w = w3;
             break;
+        case 4:
+            x = x4;
+            w = w4;
+            break;
         default:
-            std::cerr << "Wrong number of points." << std::endl;
+            cerr << "Wrong number of points." << endl;
             return 0; 
     }
 
