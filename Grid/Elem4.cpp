@@ -30,7 +30,6 @@ void Elem4::compute_jacobian(double xi, double eta, double J[2][2]) const {
          0.25 * (1 - xi)   
     };
 
-
     J[0][0] = J[0][1] = J[1][0] = J[1][1] = 0.0;
 
     for (int i = 0; i < 4; ++i) {
@@ -110,7 +109,6 @@ void Elem4::calculate_H_matrix(double conductivity) const {
                     double integrand_value = this->calculate_H_integrand(conductivity, i, j, xi, eta);
                     return integrand_value;
                 }, 2, -1.0, 1.0, -1.0, 1.0);
-                
         }
     }
 
