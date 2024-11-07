@@ -21,7 +21,7 @@ void GlobalData::read_file() {
     }
 
     dataFile >> simulation_time >> simulation_step_time >> conductivity >> alfa >> tot
-              >> initial_temp >> density >> specific_heat >> nN >> nE >> nH >> nW >> H >> W;
+             >> initial_temp >> density >> specific_heat >> nN >> nE >> nH >> nW >> H >> W;
     dataFile.close();
 
     ifstream nodeFile("XY_coordinates.txt");

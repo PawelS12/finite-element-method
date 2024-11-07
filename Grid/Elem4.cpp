@@ -38,10 +38,10 @@ void Elem4::compute_jacobian(double xi, double eta, double J[2][2]) const {
         J[1][0] += dN_dxi[i] * nodes_xy[i].get_y();   
         J[1][1] += dN_deta[i] * nodes_xy[i].get_y();  
     }
-    cout << "Jacobian matrix:" << endl;
-    cout << "[" << J[0][0] << ", " << J[1][0] << "]" << endl;
-    cout << "[" << J[0][1] << ", " << J[1][1] << "]" << endl;
-    cout << endl;
+    // cout << "Jacobian matrix:" << endl;
+    // cout << "[" << J[0][0] << ", " << J[1][0] << "]" << endl;
+    // cout << "[" << J[0][1] << ", " << J[1][1] << "]" << endl;
+    // cout << endl;
     
 }
 
@@ -58,10 +58,10 @@ void Elem4::compute_inverse_jacobian(double J[2][2], double invJ[2][2]) const {
         invJ[1][0] = -J[1][0] / detJ;
         invJ[1][1] = J[0][0] / detJ;
 
-        cout << "Inverse Jacobian matrix: " << endl;
-        cout << "[" << invJ[0][0] << ", " << invJ[1][0] << "]" << endl;
-        cout << "[" << invJ[0][1] << ", " << invJ[1][1] << "]" << endl << endl;
-        cout << "detJ = " << J[0][0] * J[1][1] - J[0][1] * J[1][0] << endl;
+        // cout << "Inverse Jacobian matrix: " << endl;
+        // cout << "[" << invJ[0][0] << ", " << invJ[1][0] << "]" << endl;
+        // cout << "[" << invJ[0][1] << ", " << invJ[1][1] << "]" << endl << endl;
+        // cout << "detJ = " << J[0][0] * J[1][1] - J[0][1] * J[1][0] << endl;
     } else {
         cerr << "Cannot compute inverse: determinant is zero." << endl;
     }
@@ -101,19 +101,22 @@ double Elem4::calculate_H_integrand(double conductivity, int i, int j, double xi
 void Elem4::calculate_H_matrix(double conductivity) const {
     Integration integrator;
     vector<double> H(16, 0.0);
+    int n = 3;
+    int c = -1;
+    int d = 1;
 
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
             H[i * 4 + j] = integrator.gauss_integration_2D(
                 [this, conductivity, i, j](double xi, double eta) -> double {
                     double integrand_value = this->calculate_H_integrand(conductivity, i, j, xi, eta);
+                    //cout << "[" << i << "][" << j << "] : " << integrand_value << endl;
                     return integrand_value;
-                }, 2, -1.0, 1.0, -1.0, 1.0);
+                }, n, c, d, c, d);
         }
     }
 
-    cout << "-----------------------------------" << endl;
-    cout << "Final H matrix:" << endl << endl;
+    cout << "Final H matrix: n = " << n << endl << endl;
     for (int i = 0; i < 4; ++i) {
         cout << "| ";
         for (int j = 0; j < 4; ++j) {

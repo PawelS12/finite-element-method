@@ -5,16 +5,13 @@
 #include "Integration.h"
 #include "Elem4.h"
 
-using std::cout;
-using std::endl;
-
 int main() {
     GlobalData data;
     data.read_file();
 
     Grid grid_1(data.get_nN(), data.get_nE(), data.get_nW(), data. get_nH(), data.get_height(), data.get_width());
     data.display_simulation_data();
-    grid_1.display_grid_data();
+    //grid_1.display_grid_data();
 
     double conductivity = data.get_conductivity();  
     
