@@ -55,7 +55,7 @@ void GlobalData::read_file() {
         nodeFile.close();
 
         create_elements_from_nodes();
-    } catch (const std::runtime_error& e) {
+    } catch (const runtime_error& e) {
         cerr << "Error: " << e.what() << endl;
     }
 }
