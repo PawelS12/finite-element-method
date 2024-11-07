@@ -1,47 +1,63 @@
-#include "GlobalData.h"
-#include "Node.h" 
-#include "Elem4.h"
 #include <math.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <stdexcept>
+#include "GlobalData.h"
+#include "Node.h" 
+#include "Elem4.h"
 
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::string;
 using std::istringstream;
 using std::ifstream;
+using std::vector;
+using std::runtime_error;
 
 void GlobalData::read_file() {
-    ifstream dataFile("data.txt");
-    if (!dataFile.is_open()) {
-        cout << "File not found." << endl;
-        return;
-    }
-
-    dataFile >> simulation_time >> simulation_step_time >> conductivity >> alfa >> tot
-             >> initial_temp >> density >> specific_heat >> nN >> nE >> nH >> nW >> H >> W;
-    dataFile.close();
-
-    ifstream nodeFile("XY_coordinates.txt");
-    if (!nodeFile.is_open()) {
-        cout << "Node coordinates file not found." << endl;
-        return;
-    }
-
-    string line;
-    while (getline(nodeFile, line)) {
-        double x, y;
-        if (istringstream(line) >> x >> y) {
-            nodes_xy.emplace_back(x, y);
-        } else {
-            cout << "Failed to read line: " << line << endl; 
+    try {
+        ifstream dataFile("data.txt");
+        if (!dataFile.is_open()) {
+            throw runtime_error("File: data.txt not found.");
         }
-    }
-    nodeFile.close();
 
-    create_elements_from_nodes();
+        if (!(dataFile >> simulation_time >> simulation_step_time >> conductivity >> alfa >> tot
+                       >> initial_temp >> density >> specific_heat >> nN >> nE >> nH >> nW >> H >> W)) {
+            throw runtime_error("Error reading data from file: data.txt");
+        }
+
+        if (simulation_time < 0) {
+            throw runtime_error("Simulation time cannot be negative.");
+        }
+        if (simulation_step_time <= 0 || conductivity <= 0 || alfa <= 0 || density <= 0 || specific_heat <= 0 
+                || nN <= 0 || nE <= 0 || nH <= 0 || nW <= 0 || H <= 0 || W <= 0) {
+            throw runtime_error("Simulation data must be positive.");
+        }
+
+        dataFile.close();
+
+        ifstream nodeFile("XY_coordinates.txt");
+        if (!nodeFile.is_open()) {
+            throw runtime_error("File: XY_coordinates.txt not found.");
+        }
+
+        string line;
+        while (getline(nodeFile, line)) {
+            double x, y;
+            if (!(istringstream(line) >> x >> y)) {
+                throw runtime_error("Failed to read line: " + line);
+            }
+            nodes_xy.emplace_back(x, y);
+        }
+        nodeFile.close();
+
+        create_elements_from_nodes();
+    } catch (const std::runtime_error& e) {
+        cerr << "Error: " << e.what() << endl;
+    }
 }
 
 double GlobalData::get_simulation_time() { return simulation_time; }

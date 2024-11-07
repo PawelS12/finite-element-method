@@ -101,9 +101,8 @@ double Elem4::calculate_H_integrand(double conductivity, int i, int j, double xi
 void Elem4::calculate_H_matrix(double conductivity) const {
     Integration integrator;
     vector<double> H(16, 0.0);
-    int n = 3;
-    int c = -1;
-    int d = 1;
+    int n = 2;
+    int c = -1, d = 1;
 
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
