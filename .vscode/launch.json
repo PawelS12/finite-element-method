@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/pok12/OneDrive/Pulpit/semestr_5/Metoda_Elementów_Skończonych/Grid",
-      "program": "c:/Users/pok12/OneDrive/Pulpit/semestr_5/Metoda_Elementów_Skończonych/Grid/build/Debug/outDebug",
+      "cwd": "c:/Users/pok12/OneDrive/Pulpit/semestr 5/Metoda Elementów Skończonych/Grid",
+      "program": "c:/Users/pok12/OneDrive/Pulpit/semestr 5/Metoda Elementów Skończonych/Grid/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

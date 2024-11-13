@@ -19,7 +19,7 @@ using std::runtime_error;
 
 void GlobalData::read_file() {
     try {
-        ifstream dataFile("data.txt");
+        ifstream dataFile("../Grid/data/data.txt");
         if (!dataFile.is_open()) {
             throw runtime_error("File: data.txt not found.");
         }
@@ -39,7 +39,7 @@ void GlobalData::read_file() {
 
         dataFile.close();
 
-        ifstream nodeFile("XY_coordinates.txt");
+        ifstream nodeFile("../Grid/data/XY_coordinates.txt");
         if (!nodeFile.is_open()) {
             throw runtime_error("File: XY_coordinates.txt not found.");
         }
