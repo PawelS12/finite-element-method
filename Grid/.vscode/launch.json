@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "c:/Users/pok12/OneDrive/Pulpit/semestr 5/Metoda Elementów Skończonych/Grid",
-      "program": "c:/Users/pok12/OneDrive/Pulpit/semestr 5/Metoda Elementów Skończonych/Grid/build/Debug/outDebug",
+      "program": "c:/Users/pok12/OneDrive/Pulpit/semestr 5/Metoda Elementów Skończonych/Grid/build/Debug/main.exe",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

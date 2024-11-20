@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include "GlobalData.h"
 #include "Node.h" 
-#include "Elem4.h"
+#include "Element.h"
 
 using std::cout;
 using std::cerr;
@@ -17,14 +17,16 @@ using std::ifstream;
 using std::vector;
 using std::runtime_error;
 
+vector<Node> GlobalData::nodes_xy;
+
 void GlobalData::read_file() {
     try {
-        ifstream dataFile("../Grid/data/data.txt");
-        if (!dataFile.is_open()) {
+        ifstream data_file("../Grid/data/data.txt");
+        if (!data_file.is_open()) {
             throw runtime_error("File: data.txt not found.");
         }
 
-        if (!(dataFile >> simulation_time >> simulation_step_time >> conductivity >> alfa >> tot
+        if (!(data_file >> simulation_time >> simulation_step_time >> conductivity >> alfa >> tot
                        >> initial_temp >> density >> specific_heat >> nN >> nE >> nH >> nW >> H >> W)) {
             throw runtime_error("Error reading data from file: data.txt");
         }
@@ -32,29 +34,30 @@ void GlobalData::read_file() {
         if (simulation_time < 0) {
             throw runtime_error("Simulation time cannot be negative.");
         }
+
         if (simulation_step_time <= 0 || conductivity <= 0 || alfa <= 0 || density <= 0 || specific_heat <= 0 
                 || nN <= 0 || nE <= 0 || nH <= 0 || nW <= 0 || H <= 0 || W <= 0) {
             throw runtime_error("Simulation data must be positive.");
         }
 
-        dataFile.close();
+        data_file.close();
 
-        ifstream nodeFile("../Grid/data/XY_coordinates.txt");
-        if (!nodeFile.is_open()) {
-            throw runtime_error("File: XY_coordinates.txt not found.");
+        ifstream xy_nodes_file("../Grid/data/xy_nodes.txt");
+        if (!xy_nodes_file.is_open()) {
+            throw runtime_error("File: xy_nodes.txt not found.");
         }
 
         string line;
-        while (getline(nodeFile, line)) {
+        while (getline(xy_nodes_file, line)) {
             double x, y;
             if (!(istringstream(line) >> x >> y)) {
+                cout << x << y;
                 throw runtime_error("Failed to read line: " + line);
             }
             nodes_xy.emplace_back(x, y);
         }
-        nodeFile.close();
+        xy_nodes_file.close();
 
-        create_elements_from_nodes();
     } catch (const runtime_error& e) {
         cerr << "Error: " << e.what() << endl;
     }
@@ -74,7 +77,7 @@ double GlobalData::get_nH() { return nH; }
 double GlobalData::get_nW() { return nW; }
 double GlobalData::get_height() { return H; }
 double GlobalData::get_width() { return W; }
-const vector<Elem4>& GlobalData::get_elements() const { return elements; }
+const vector<Node>& GlobalData::get_nodes() { return nodes_xy; }
 
 void GlobalData::display_simulation_data() {
     cout << "-----------------------------------" << endl;
@@ -94,16 +97,4 @@ void GlobalData::display_simulation_data() {
     cout << "Height: " << H << endl;
     cout << "Width: " << W << endl;
     cout << "-----------------------------------" << endl;
-    cout << "XY nodes:" << endl;
-    for (const auto& node : nodes_xy) {
-        node.display_node();
-    }
-    cout << "-----------------------------------" << endl;
-}
-
-void GlobalData::create_elements_from_nodes() {
-    for (size_t i = 0; i < nodes_xy.size() - 3; i += 4) {
-        Elem4 newElement(nodes_xy[i], nodes_xy[i + 1], nodes_xy[i + 2], nodes_xy[i + 3]);
-        elements.push_back(newElement);
-    }
 }

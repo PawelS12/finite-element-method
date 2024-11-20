@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "Node.h"
-#include "Elem4.h"
+#include "Element.h"
 #include <fstream>
 #include <vector>
 
@@ -13,12 +13,11 @@ using std::string;
 class GlobalData {
 private:
     double simulation_time, simulation_step_time, conductivity, alfa, tot, initial_temp, density, specific_heat, nN, nE, nH, nW, H, W;
-    vector<Node> nodes_xy;
-    vector<Elem4> elements;
+    vector<Element> elements;
+    static vector<Node> nodes_xy;
 
 public:
     void read_file();
-    void read_node_coordinates();
     double get_simulation_time();
     double get_simulation_step_time();
     double get_conductivity();
@@ -33,9 +32,8 @@ public:
     double get_nW();
     double get_height();
     double get_width();
-    const std::vector<Elem4>& get_elements() const;
+    const static vector<Node>& get_nodes();
     void display_simulation_data();
-    void create_elements_from_nodes();
 };
 
 #endif // GLOBALDATA_H

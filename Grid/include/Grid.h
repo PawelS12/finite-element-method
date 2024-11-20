@@ -3,8 +3,8 @@
 
 #include <vector>
 #include "Node.h"
-#include "Elem4.h"
 #include "Element.h"
+#include "GlobalData.h"
 
 using std::vector;
 
@@ -12,13 +12,13 @@ class Grid {
 private:
     double nN, nE, nW, nH, height, width;
     vector<Node> nodes;
-    vector<Node> nodes_xy;
+    static vector<Node> nodes_xy;
     vector<Element> elements;
 
 public:
     Grid();
     Grid(double p_nN, double p_nE, double p_nW, double p_nH, double p_height, double p_width);
-    void create_nodes();
+    const vector<Element>& get_elements() const;
     void create_elements();
     void display_grid_data();
 };

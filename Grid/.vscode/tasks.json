@@ -1,0 +1,37 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "type": "cppbuild",
+        "label": "C/C++: g++ kompiluj wszystkie pliki",
+        "command": "C:/msys64/mingw64/bin/g++.exe", 
+        "args": [
+          "-fdiagnostics-color=always",
+          "-g",
+          "${workspaceFolder}/src/Element.cpp",
+          "${workspaceFolder}/src/GlobalData.cpp",
+          "${workspaceFolder}/src/FEMSolver.cpp",
+          "${workspaceFolder}/src/Grid.cpp",
+          "${workspaceFolder}/src/Integration.cpp",
+          "${workspaceFolder}/src/main.cpp",
+          "${workspaceFolder}/src/Node.cpp",
+          "-o",
+          "${workspaceFolder}/simulation.exe",
+          "-I",
+          "${workspaceFolder}/include"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": [
+          "$gcc"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "detail": ""
+      }
+    ]
+  }
+  
