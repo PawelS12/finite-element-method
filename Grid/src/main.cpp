@@ -1,6 +1,5 @@
 #include <iostream>
 #include <math.h>
-#include <iomanip> 
 #include "GlobalData.h"
 #include "FEMSolver.h"
 #include "Grid.h"
@@ -9,12 +8,8 @@
 
 using std::cout;
 using std::endl;
-using std::fixed;
-using std::setprecision;
 
 int main() {
-    //cout << fixed << setprecision(5);
-
     GlobalData data;
     data.read_file();
 
@@ -29,6 +24,6 @@ int main() {
     solver.aggregate_H_matrix(H_global, data.get_nN());  
     
     
-    //system("pause");
+    system("pause");
     return 0;
 }

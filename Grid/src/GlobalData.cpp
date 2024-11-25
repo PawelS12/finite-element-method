@@ -58,6 +58,12 @@ void GlobalData::read_file() {
         }
         xy_nodes_file.close();
 
+        if (nodes_xy.empty()) {
+            cerr << "Error: No nodes were loaded from xy_nodes.txt" << endl;
+        } else {
+            //cout << "Loaded " << nodes_xy.size() << " nodes from file." << endl;
+        }
+
     } catch (const runtime_error& e) {
         cerr << "Error: " << e.what() << endl;
     }
@@ -92,9 +98,5 @@ void GlobalData::display_simulation_data() {
     cout << "Specific heat: " << specific_heat << endl;
     cout << "Number of nodes: " << nN << endl;
     cout << "Number of elements: " << nE << endl;
-    cout << "Nodes height: " << nH << endl;
-    cout << "Nodes width: " << nW << endl;
-    cout << "Height: " << H << endl;
-    cout << "Width: " << W << endl;
     cout << "-----------------------------------" << endl;
 }
