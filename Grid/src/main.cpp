@@ -17,13 +17,11 @@ int main() {
     data.display_simulation_data();
     grid.display_grid_data();
 
-    FEMSolver solver(grid);
+    FEMSolver solver(grid, data.get_alfa());
     double conductivity = data.get_conductivity();
     solver.calculate_H_matrix(conductivity); 
     vector<vector<double>> H_global;
     solver.aggregate_H_matrix(H_global, data.get_nN());  
     
-    
-    system("pause");
     return 0;
 }

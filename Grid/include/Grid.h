@@ -18,7 +18,7 @@ private:
 public:
     Grid();
     Grid(double p_nN, double p_nE, double p_nW, double p_nH, double p_height, double p_width);
-    const vector<Element>& get_elements() const;
+    vector<Element>& get_elements();
     void create_elements();
     void display_grid_data();
 };

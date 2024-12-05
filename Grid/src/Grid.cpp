@@ -16,7 +16,7 @@ Grid::Grid(double p_nN, double p_nE, double p_nW, double p_nH, double p_height, 
 
 vector<Node> Grid::nodes_xy;
 
-const vector<Element>& Grid::get_elements() const {
+vector<Element>& Grid::get_elements() {
      return elements; 
 }
 
@@ -46,7 +46,6 @@ void Grid::create_elements() {
         }
     }
 }
-
 
 void Grid::display_grid_data() {
     cout << "Nodes:" << endl << endl;

@@ -59,3 +59,16 @@ double Integration::gauss_integration_2D(function<double(double, double)> f, int
     
     return d1 * d2 * suma; 
 }
+
+vector<double> Integration::get_weights_1D(int order)  {
+    if (order == 2) return {1.0, 1.0};
+    else if (order == 4) return  { (18.0 - sqrt(30.0)) / 36.0, (18.0 + sqrt(30.0)) / 36.0, (18.0 + sqrt(30.0)) / 36.0, (18.0 - sqrt(30.0)) / 36.0 };
+    return {};
+}
+
+vector<double> Integration::get_points_1D(int order)  {
+    if (order == 2) return { -1.0 / sqrt(3.0), 1.0 / sqrt(3.0) };
+    else if (order == 4) return { -sqrt((3.0 + 2.0 * sqrt(6.0 / 5.0)) / 7.0), -sqrt((3.0 - 2.0 * sqrt(6.0 / 5.0)) / 7.0), sqrt((3.0 - 2.0 * sqrt(6.0 / 5.0)) / 7.0), sqrt((3.0 + 2.0 * sqrt(6.0 / 5.0)) / 7.0) };
+   
+    return {};
+}

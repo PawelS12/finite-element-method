@@ -11,6 +11,7 @@ class Element {
 private:
     Node nodes_xy[4]; 
     vector<int> ID;
+    vector<vector<double>> Hbc;
 
 public:
     Element(const Node& n1, const Node& n2, const Node& n3, const Node& n4);
@@ -18,6 +19,8 @@ public:
     void display_ID() const;
     const Node* get_nodes() const;
     const std::vector<int>& get_ID() const;
+    void set_Hbc(const vector<vector<double>>& hbc);
+    const vector<vector<double>>& get_Hbc() const;
 };
 
 #endif // ELEMENT_H

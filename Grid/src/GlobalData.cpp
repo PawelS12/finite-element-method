@@ -50,18 +50,17 @@ void GlobalData::read_file() {
         string line;
         while (getline(xy_nodes_file, line)) {
             double x, y;
-            if (!(istringstream(line) >> x >> y)) {
-                cout << x << y;
+            int BC;
+            if (!(istringstream(line) >> x >> y >> BC)) {
+                cout << x << y << BC;
                 throw runtime_error("Failed to read line: " + line);
             }
-            nodes_xy.emplace_back(x, y);
+            nodes_xy.emplace_back(x, y, BC);
         }
         xy_nodes_file.close();
 
         if (nodes_xy.empty()) {
             cerr << "Error: No nodes were loaded from xy_nodes.txt" << endl;
-        } else {
-            //cout << "Loaded " << nodes_xy.size() << " nodes from file." << endl;
         }
 
     } catch (const runtime_error& e) {

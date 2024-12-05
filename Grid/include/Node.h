@@ -6,12 +6,14 @@
 class Node {
 private:
     double x, y;
+    int BC;
 
 public:
     Node();
-    Node(double p_x, double p_y);
+    Node(double p_x, double p_y, int BC);
     double get_x() const;
     double get_y() const;
+    int get_BC() const;
     void display_node() const;
 };
 

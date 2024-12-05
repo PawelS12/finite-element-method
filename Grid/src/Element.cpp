@@ -14,6 +14,7 @@ Element::Element(const Node& n1, const Node& n2, const Node& n3, const Node& n4)
     nodes_xy[2] = n3;
     nodes_xy[3] = n4;
     ID.resize(4, 0);
+    Hbc.resize(4, vector<double>(4, 0.0));
 }
 
 const Node* Element::get_nodes() const {
@@ -29,7 +30,6 @@ void Element::set_ID(int node_1, int node_2, int node_3, int node_4) {
     ID[1] = node_2;
     ID[2] = node_3;
     ID[3] = node_4;
-    // cout << "Setting Element ID: " << node_1 << ", " << node_2 << ", " << node_3 << ", " << node_4 << endl;
 }
 
 void Element::display_ID() const {
@@ -38,4 +38,12 @@ void Element::display_ID() const {
         cout << ID[i] << " ";
     }
     cout << endl;
+}
+
+void Element::set_Hbc(const vector<vector<double>>& hbc) {
+     Hbc = hbc; 
+}
+
+const vector<vector<double>>& Element::get_Hbc() const { 
+    return Hbc; 
 }
