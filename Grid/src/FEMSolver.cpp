@@ -22,6 +22,15 @@ FEMSolver::FEMSolver(Grid& grid, double alpha) : grid(grid) {
     calculate_Hbc_matrix(alpha);
 }
 
+void FEMSolver::display_matrix(vector<vector<double>>& matrix) {  
+    for (const auto& row : matrix) {
+        for (const auto& value : row) {
+            cout << value << " ";
+        }
+        cout << endl;
+    }
+}
+
 void FEMSolver::compute_jacobian(const Element& element, double xi, double eta, double J[2][2]) const {
     double dN_dxi[4] = {
         -0.25 * (1 - eta),  
@@ -140,6 +149,7 @@ void FEMSolver::calculate_H_matrix(double conductivity) {
             }
             cout << endl;
         }
+        cout << endl;
     }
 }
 
@@ -188,17 +198,32 @@ void FEMSolver::aggregate_H_matrix(vector<vector<double>>& H_global, int nodes_n
     }
 }
 
+void FEMSolver::compute_edge_jacobian(const Node& node1, const Node& node2, double xi, double& detJ) const {
+    double N1 = 0.5 * (1 - xi);
+    double N2 = 0.5 * (1 + xi);
+    double x = N1 * node1.get_x() + N2 * node2.get_x();
+    double y = N1 * node1.get_y() + N2 * node2.get_y();
+    double dN1_dxi = -0.5;
+    double dN2_dxi = 0.5;
+    double dx_dxi = dN1_dxi * node1.get_x() + dN2_dxi * node2.get_x();
+    double dy_dxi = dN1_dxi * node1.get_y() + dN2_dxi * node2.get_y();
+
+    detJ = sqrt(dx_dxi * dx_dxi + dy_dxi * dy_dxi);
+}
+
+
 void FEMSolver::integrate_Hbc_on_edge(const Node& node1, const Node& node2, double alpha, vector<vector<double>>& Hbc) const {
     Integration integrator;
-    double edge_length = sqrt(pow(node2.get_x() - node1.get_x(), 2) + pow(node2.get_y() - node1.get_y(), 2));
-    double detJ = edge_length / 2.0;
-
-    vector<double> weights = integrator.get_weights_1D(4); 
-    vector<double> points = integrator.get_points_1D(4);   
+    vector<double> weights = integrator.get_weights_1D(2); 
+    vector<double> points = integrator.get_points_1D(2);   
     
     for (int gp = 0; gp < points.size(); ++gp) {
         double xi = points[gp];
         double weight = weights[gp];
+        double detJ;
+
+        compute_edge_jacobian(node1, node2, xi, detJ);
+
         double N[2] = {0.5 * (1 - xi), 0.5 * (1 + xi)};
 
         for (int i = 0; i < 2; ++i) {
@@ -240,5 +265,6 @@ void FEMSolver::calculate_Hbc_matrix(double alpha) {
             }
             cout << endl;
         }
+        cout << endl;
     }
 }
