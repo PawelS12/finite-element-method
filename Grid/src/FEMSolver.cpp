@@ -17,9 +17,9 @@ using std::fixed;
 using std::setprecision;
 using std::ofstream;
 
-FEMSolver::FEMSolver(Grid& grid, double alpha) : grid(grid) {
+FEMSolver::FEMSolver(Grid& grid, double alpha, double ambient_temperature) : grid(grid) {
     local_H_matrices.resize(grid.get_elements().size(), vector<double>(4, 0.0));
-    calculate_Hbc_matrix(alpha);
+    calculate_local_Hbc_matrix(alpha);
 }
 
 void FEMSolver::display_matrix(vector<vector<double>>& matrix) {  
@@ -108,7 +108,7 @@ double FEMSolver::calculate_H_integrand(const Element& element, double conductiv
     return conductivity * (dN_dx[i] * dN_dx[j] + dN_dy[i] * dN_dy[j]) * detJ;
 }
 
-void FEMSolver::calculate_H_matrix(double conductivity) {
+void FEMSolver::calculate_Hbc_matrix(double conductivity) {
     Integration integrator;
     local_H_matrices.clear(); 
 
@@ -153,7 +153,7 @@ void FEMSolver::calculate_H_matrix(double conductivity) {
     }
 }
 
-void FEMSolver::aggregate_H_matrix(vector<vector<double>>& H_global, int nodes_num) const {
+void FEMSolver::aggregate_Hbc_matrix(vector<vector<double>>& H_global, int nodes_num) const {
     H_global.assign(nodes_num, vector<double>(nodes_num, 0.0));  
     const auto& elements = grid.get_elements();
 
@@ -196,45 +196,34 @@ void FEMSolver::aggregate_H_matrix(vector<vector<double>>& H_global, int nodes_n
         }
         cout << endl;
     }
+    cout << endl;
 }
-
-void FEMSolver::compute_edge_jacobian(const Node& node1, const Node& node2, double xi, double& detJ) const {
-    double N1 = 0.5 * (1 - xi);
-    double N2 = 0.5 * (1 + xi);
-    double x = N1 * node1.get_x() + N2 * node2.get_x();
-    double y = N1 * node1.get_y() + N2 * node2.get_y();
-    double dN1_dxi = -0.5;
-    double dN2_dxi = 0.5;
-    double dx_dxi = dN1_dxi * node1.get_x() + dN2_dxi * node2.get_x();
-    double dy_dxi = dN1_dxi * node1.get_y() + dN2_dxi * node2.get_y();
-
-    detJ = sqrt(dx_dxi * dx_dxi + dy_dxi * dy_dxi);
-}
-
 
 void FEMSolver::integrate_Hbc_on_edge(const Node& node1, const Node& node2, double alpha, vector<vector<double>>& Hbc) const {
     Integration integrator;
-    vector<double> weights = integrator.get_weights_1D(2); 
-    vector<double> points = integrator.get_points_1D(2);   
-    
-    for (int gp = 0; gp < points.size(); ++gp) {
-        double xi = points[gp];
-        double weight = weights[gp];
-        double detJ;
+    vector<double> xi_points = integrator.get_points(2);  
+    vector<double> weights = integrator.get_weights(2);  
 
-        compute_edge_jacobian(node1, node2, xi, detJ);
+    for (int k = 0; k < 2; ++k) {
+        double xi = xi_points[k];
+        double weight = weights[k];
+        double N1 = 0.5 * (1 - xi);
+        double N2 = 0.5 * (1 + xi);
+        double x = N1 * node1.get_x() + N2 * node2.get_x();
+        double y = N1 * node1.get_y() + N2 * node2.get_y();
+        double dx_dxi = -0.5 * (node1.get_x() - node2.get_x());
+        double dy_dxi = -0.5 * (node1.get_y() - node2.get_y());
+        double detJ = sqrt(dx_dxi * dx_dxi + dy_dxi * dy_dxi);
+        double Hbc_value = alpha * weight * detJ; 
 
-        double N[2] = {0.5 * (1 - xi), 0.5 * (1 + xi)};
-
-        for (int i = 0; i < 2; ++i) {
-            for (int j = 0; j < 2; ++j) {
-                Hbc[i][j] += alpha * N[i] * N[j] * weight * detJ;
-            }
-        }
+        Hbc[0][0] += Hbc_value * N1 * N1;
+        Hbc[0][1] += Hbc_value * N1 * N2;
+        Hbc[1][0] += Hbc_value * N2 * N1;
+        Hbc[1][1] += Hbc_value * N2 * N2;
     }
 }
 
-void FEMSolver::calculate_Hbc_matrix(double alpha) {
+void FEMSolver::calculate_local_Hbc_matrix(double alpha) {
     for (auto& element : grid.get_elements()) {
         vector<vector<double>> Hbc_local(4, vector<double>(4, 0.0));
 
@@ -266,5 +255,83 @@ void FEMSolver::calculate_Hbc_matrix(double alpha) {
             cout << endl;
         }
         cout << endl;
+    }
+}
+
+void FEMSolver::calculate_P_vector(double alpha, double ambient_temperature) {
+    cout << "-----------------------------------" << endl;
+    cout << "Local P vectors for elements:" << endl << endl;
+
+    for (auto& element : grid.get_elements()) {
+        vector<double> P_local(4, 0.0);
+        const Node* nodes = element.get_nodes();
+
+        for (int edge = 0; edge < 4; ++edge) {
+            const Node& node1 = nodes[edge];
+            const Node& node2 = nodes[(edge + 1) % 4];
+
+            if (node1.get_BC() && node2.get_BC()) {
+                Integration integrator;
+                vector<double> xi_points = integrator.get_points(2);
+                vector<double> weights = integrator.get_weights(2);
+                double L = sqrt(pow(node2.get_x() - node1.get_x(), 2) + pow(node2.get_y() - node1.get_y(), 2));
+
+                for (int k = 0; k < 2; ++k) {
+                    double xi = xi_points[k];
+                    double weight = weights[k];
+                    double N1 = 0.5 * (1 - xi);
+                    double N2 = 0.5 * (1 + xi);
+                    double detJ = 0.5 * L; 
+                    double q = alpha * ambient_temperature * weight * detJ;
+
+                    P_local[edge] += q * N1;
+                    P_local[(edge + 1) % 4] += q * N2;
+                }
+            }
+        }
+
+        element.set_P(P_local);
+
+        for (const auto& value : P_local) {
+            cout << value << " ";
+        }
+        cout << endl << endl;
+    }
+}
+
+void FEMSolver::aggregate_P_vector(vector<double>& P_global, int nodes_num) const {
+    P_global.assign(nodes_num, 0.0);  
+    const auto& elements = grid.get_elements();
+
+    for (const auto& element : elements) {
+        const auto& P_local = element.get_P(); 
+        const auto& ID = element.get_ID();   
+
+        for (int i = 0; i < 4; ++i) {
+            if (ID[i] < nodes_num) {
+                P_global[ID[i]] += P_local[i]; 
+            } else {
+                cerr << "Invalid global index: " << ID[i] << endl;
+            }
+        }
+    }
+
+    cout << "-----------------------------------" << endl;
+    cout << "Global P vector:" << endl << endl;
+    for (const auto& value : P_global) {
+        cout << value << " ";
+    }
+    cout << endl << endl;
+
+    ofstream output_file("../Grid/results/global_P_vector.txt");
+    if (output_file.is_open()) {
+        output_file << "Global P vector:" << endl << endl;
+        for (const auto& val : P_global) {
+            output_file << val << " ";
+        }
+        
+        output_file.close(); 
+    } else {
+        cerr << "Error" << endl;
     }
 }

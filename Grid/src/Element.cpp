@@ -15,13 +15,14 @@ Element::Element(const Node& n1, const Node& n2, const Node& n3, const Node& n4)
     nodes_xy[3] = n4;
     ID.resize(4, 0);
     Hbc.resize(4, vector<double>(4, 0.0));
+    P.resize(4, 0.0);
 }
 
 const Node* Element::get_nodes() const {
     return nodes_xy;
 }
 
-const std::vector<int>& Element::get_ID() const {
+const vector<int>& Element::get_ID() const {
     return ID;
 }
 
@@ -46,4 +47,12 @@ void Element::set_Hbc(const vector<vector<double>>& hbc) {
 
 const vector<vector<double>>& Element::get_Hbc() const { 
     return Hbc; 
+}
+
+void Element::set_P(const vector<double>& p) {
+    P = p;
+}
+
+const vector<double>& Element::get_P() const {
+    return P;
 }

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <vector>
 #include "GlobalData.h"
 #include "FEMSolver.h"
 #include "Grid.h"
@@ -8,6 +9,7 @@
 
 using std::cout;
 using std::endl;
+using std::vector;
 
 int main() {
     GlobalData data;
@@ -17,11 +19,15 @@ int main() {
     data.display_simulation_data();
     grid.display_grid_data();
 
-    FEMSolver solver(grid, data.get_alfa());
-    double conductivity = data.get_conductivity();
-    solver.calculate_H_matrix(conductivity); 
+    vector<double> P_global;
     vector<vector<double>> H_global;
-    solver.aggregate_H_matrix(H_global, data.get_nN());  
+    double conductivity = data.get_conductivity();
     
+    FEMSolver solver(grid, data.get_alfa(), data.get_ambient_temp());
+    solver.calculate_Hbc_matrix(conductivity); 
+    solver.aggregate_Hbc_matrix(H_global, data.get_nN());  
+    solver.calculate_P_vector(data.get_alfa(), data.get_ambient_temp());
+    solver.aggregate_P_vector(P_global, data.get_nN());
+
     return 0;
 }

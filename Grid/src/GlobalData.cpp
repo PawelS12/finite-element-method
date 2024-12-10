@@ -26,7 +26,7 @@ void GlobalData::read_file() {
             throw runtime_error("File: data.txt not found.");
         }
 
-        if (!(data_file >> simulation_time >> simulation_step_time >> conductivity >> alfa >> tot
+        if (!(data_file >> simulation_time >> simulation_step_time >> conductivity >> alfa >> ambient_temp
                        >> initial_temp >> density >> specific_heat >> nN >> nE >> nH >> nW >> H >> W)) {
             throw runtime_error("Error reading data from file: data.txt");
         }
@@ -72,7 +72,7 @@ double GlobalData::get_simulation_time() { return simulation_time; }
 double GlobalData::get_simulation_step_time() { return simulation_step_time; }
 double GlobalData::get_conductivity() { return conductivity; }
 double GlobalData::get_alfa() { return alfa; }
-double GlobalData::get_tot() { return tot; }
+double GlobalData::get_ambient_temp() { return ambient_temp; }
 double GlobalData::get_initial_temp() { return initial_temp; }
 double GlobalData::get_density() { return density; }
 double GlobalData::get_specific_heat() { return specific_heat; }
@@ -91,7 +91,7 @@ void GlobalData::display_simulation_data() {
     cout << "Simulation step time: " << simulation_step_time << endl;
     cout << "Conductivity: " << conductivity << endl;
     cout << "Alfa: " << alfa << endl;
-    cout << "Tot: " << tot << endl;
+    cout << "Ambient temperature: " << ambient_temp << endl;
     cout << "Initial temperature: " << initial_temp << endl;
     cout << "Density: " << density << endl;
     cout << "Specific heat: " << specific_heat << endl;

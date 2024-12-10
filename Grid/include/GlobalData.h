@@ -12,7 +12,7 @@ using std::string;
 
 class GlobalData {
 private:
-    double simulation_time, simulation_step_time, conductivity, alfa, tot, initial_temp, density, specific_heat, nN, nE, nH, nW, H, W;
+    double simulation_time, simulation_step_time, conductivity, alfa, ambient_temp, initial_temp, density, specific_heat, nN, nE, nH, nW, H, W;
     vector<Element> elements;
     static vector<Node> nodes_xy;
 
@@ -22,7 +22,7 @@ public:
     double get_simulation_step_time();
     double get_conductivity();
     double get_alfa();
-    double get_tot();
+    double get_ambient_temp();
     double get_initial_temp();
     double get_density();
     double get_specific_heat();
