@@ -25,6 +25,7 @@ public:
     void compute_edge_jacobian(const Node& node1, const Node& node2, double xi, double& detJ) const;
     void calculate_P_vector(double alpha, double ambient_temperature);
     void aggregate_P_vector(vector<double>& P_global, int nodes_num) const;
+    void solve_system(vector<vector<double>>& H_global, vector<double>& P_global, vector<double>& t_global);
 };
 
 #endif // FEMSOLVER_H

@@ -29,5 +29,8 @@ int main() {
     solver.calculate_P_vector(data.get_alfa(), data.get_ambient_temp());
     solver.aggregate_P_vector(P_global, data.get_nN());
 
+    vector<double> t_global;  
+    solver.solve_system(H_global, P_global, t_global);
+
     return 0;
 }

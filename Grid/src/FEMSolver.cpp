@@ -129,7 +129,7 @@ void FEMSolver::calculate_Hbc_matrix(double conductivity) {
                 H[i * 4 + j] = integrator.gauss_integration_2D(
                     [this, &element, conductivity, i, j](double xi, double eta) -> double {
                         return this->calculate_H_integrand(element, conductivity, i, j, xi, eta);
-                    }, 4, -1, 1, -1, 1);
+                    }, 16, -1, 1, -1, 1);
             }
         }
 
@@ -201,19 +201,17 @@ void FEMSolver::aggregate_Hbc_matrix(vector<vector<double>>& H_global, int nodes
 
 void FEMSolver::integrate_Hbc_on_edge(const Node& node1, const Node& node2, double alpha, vector<vector<double>>& Hbc) const {
     Integration integrator;
-    vector<double> xi_points = integrator.get_points(2);  
-    vector<double> weights = integrator.get_weights(2);  
+    vector<double> xi_points = integrator.get_points(4);  
+    vector<double> weights = integrator.get_weights(4); 
 
-    for (int k = 0; k < 2; ++k) {
+    double L = sqrt(pow(node2.get_x() - node1.get_x(), 2) + pow(node2.get_y() - node1.get_y(), 2));
+
+    for (int k = 0; k < xi_points.size(); ++k) {
         double xi = xi_points[k];
         double weight = weights[k];
         double N1 = 0.5 * (1 - xi);
         double N2 = 0.5 * (1 + xi);
-        double x = N1 * node1.get_x() + N2 * node2.get_x();
-        double y = N1 * node1.get_y() + N2 * node2.get_y();
-        double dx_dxi = -0.5 * (node1.get_x() - node2.get_x());
-        double dy_dxi = -0.5 * (node1.get_y() - node2.get_y());
-        double detJ = sqrt(dx_dxi * dx_dxi + dy_dxi * dy_dxi);
+        double detJ = L / 2;
         double Hbc_value = alpha * weight * detJ; 
 
         Hbc[0][0] += Hbc_value * N1 * N1;
@@ -276,7 +274,7 @@ void FEMSolver::calculate_P_vector(double alpha, double ambient_temperature) {
                 vector<double> weights = integrator.get_weights(2);
                 double L = sqrt(pow(node2.get_x() - node1.get_x(), 2) + pow(node2.get_y() - node1.get_y(), 2));
 
-                for (int k = 0; k < 2; ++k) {
+                for (int k = 0; k < xi_points.size(); ++k) {
                     double xi = xi_points[k];
                     double weight = weights[k];
                     double N1 = 0.5 * (1 - xi);
@@ -332,6 +330,67 @@ void FEMSolver::aggregate_P_vector(vector<double>& P_global, int nodes_num) cons
         
         output_file.close(); 
     } else {
-        cerr << "Error" << endl;
+        cerr << "Error" << endl;    
+    }
+}
+
+void FEMSolver::solve_system(vector<vector<double>>& H_global, vector<double>& P_global, vector<double>& t_global) {
+    int n = H_global.size();
+    
+    vector<vector<double>> A = H_global;  
+    vector<double> b = P_global;      
+    vector<double> x(n, 0.0);            
+
+    for (int i = 0; i < n; i++) {
+        int max_row = i;
+        for (int k = i + 1; k < n; k++) {
+            if (abs(A[k][i]) > abs(A[max_row][i])) {
+                max_row = k;
+            }
+        }
+
+        if (abs(A[max_row][i]) < 1e-12) {
+            throw std::runtime_error("The matrix is ​​singular, the system cannot be solved.");
+        }
+
+        std::swap(A[i], A[max_row]);
+        std::swap(b[i], b[max_row]);
+
+        for (int j = i + 1; j < n; j++) {
+            double factor = A[j][i] / A[i][i];
+            for (int k = i; k < n; k++) {
+                A[j][k] -= factor * A[i][k];
+            }
+            b[j] -= factor * b[i];
+        }
+    }
+
+    for (int i = n - 1; i >= 0; i--) {
+        x[i] = b[i];
+        for (int j = i + 1; j < n; j++) {
+            x[i] -= A[i][j] * x[j];
+        }
+        x[i] /= A[i][i];
+    }
+
+    t_global = x;
+
+    cout << "-----------------------------------" << endl;
+    cout << "Global t vector:" << endl << endl;
+    for (const auto& temp : t_global) {
+        cout << temp << " ";
+    }
+    cout << endl;
+
+    ofstream output_file("../Grid/results/global_t_vector.txt");
+    if (output_file.is_open()) {
+        output_file << "Global t vector:" << endl << endl;
+        for (const auto& val : t_global) {
+            output_file << val << " ";
+        }
+        
+        output_file.close(); 
+    } else {
+        cerr << "Error" << endl;    
     }
 }
