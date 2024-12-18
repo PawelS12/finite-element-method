@@ -11,6 +11,7 @@ using std::abs;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::swap;
 using std::vector;
 using std::fill;
 using std::fixed;
@@ -350,11 +351,11 @@ void FEMSolver::solve_system(vector<vector<double>>& H_global, vector<double>& P
         }
 
         if (abs(A[max_row][i]) < 1e-12) {
-            throw std::runtime_error("The matrix is ​​singular, the system cannot be solved.");
+            cerr << ("The matrix is ​​singular, the system cannot be solved.") << endl;
         }
 
-        std::swap(A[i], A[max_row]);
-        std::swap(b[i], b[max_row]);
+        swap(A[i], A[max_row]);
+        swap(b[i], b[max_row]);
 
         for (int j = i + 1; j < n; j++) {
             double factor = A[j][i] / A[i][i];
