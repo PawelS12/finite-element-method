@@ -9,7 +9,7 @@
 class FEMSolver {
 private:
     Grid& grid;
-    vector<vector<double>> local_H_matrices;
+    vector<vector<double>> local_H_matrices, local_C_matrices;
     vector<double> P_global;
 public:
     explicit FEMSolver(Grid& grid, double alpha, double ambient_temperature);
@@ -26,6 +26,9 @@ public:
     void calculate_P_vector(double alpha, double ambient_temperature);
     void aggregate_P_vector(vector<double>& P_global, int nodes_num) const;
     void solve_system(vector<vector<double>>& H_global, vector<double>& P_global, vector<double>& t_global);
+    void calculate_C_matrix(double density, double specific_heat);
+    void aggregate_C_matrix(vector<vector<double>>& C_global, int nodes_num) const;
+    void simulate_time(vector<vector<double>>& H_global, vector<vector<double>>& C_global, vector<double>& P_global, vector<double>& t_initial, double time_step, double total_time);
 };
 
 #endif // FEMSOLVER_H

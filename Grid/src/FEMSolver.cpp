@@ -6,6 +6,7 @@
 #include <vector>
 #include <iomanip> 
 #include <fstream>
+#include <algorithm>
 
 using std::abs;
 using std::cout;
@@ -17,6 +18,8 @@ using std::fill;
 using std::fixed;
 using std::setprecision;
 using std::ofstream;
+using std::min_element;
+using std::max_element;
 
 FEMSolver::FEMSolver(Grid& grid, double alpha, double ambient_temperature) : grid(grid) {
     local_H_matrices.resize(grid.get_elements().size(), vector<double>(4, 0.0));
@@ -133,6 +136,16 @@ void FEMSolver::calculate_Hbc_matrix(double conductivity) {
                     }, 16, -1, 1, -1, 1);
             }
         }
+
+        cout << "-----------------------------------" << endl;
+        cout << "Macierz H bez bc:" << endl;
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                cout << H[i * 4 + j] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
 
         const auto& Hbc_local = element.get_Hbc();
         for (int i = 0; i < 4; ++i) {
@@ -351,7 +364,7 @@ void FEMSolver::solve_system(vector<vector<double>>& H_global, vector<double>& P
         }
 
         if (abs(A[max_row][i]) < 1e-12) {
-            cerr << ("The matrix is ​​singular, the system cannot be solved.") << endl;
+            cerr << ("The matrix is singular, the system cannot be solved.") << endl;
         }
 
         swap(A[i], A[max_row]);
@@ -381,7 +394,7 @@ void FEMSolver::solve_system(vector<vector<double>>& H_global, vector<double>& P
     for (const auto& temp : t_global) {
         cout << temp << " ";
     }
-    cout << endl;
+    cout << endl << endl;
 
     ofstream output_file("../Grid/results/global_t_vector.txt");
     if (output_file.is_open()) {
@@ -394,4 +407,173 @@ void FEMSolver::solve_system(vector<vector<double>>& H_global, vector<double>& P
     } else {
         cerr << "Error" << endl;    
     }
+}
+
+void FEMSolver::calculate_C_matrix(double density, double specific_heat) {
+    Integration integrator;
+    local_C_matrices.clear(); 
+
+    int order = 4; 
+    vector<double> gauss_points = integrator.get_points(order);
+    vector<double> gauss_weights = integrator.get_weights(order);
+
+    for (const auto& element : grid.get_elements()) {
+        vector<double> C_local(16, 0.0);  
+
+        const auto& nodes = element.get_nodes();
+
+        for (int i = 0; i < order; ++i) { 
+            for (int j = 0; j < order; ++j) { 
+                double xi = gauss_points[i];
+                double eta = gauss_points[j];
+                double weight = gauss_weights[i] * gauss_weights[j]; 
+
+                double N[4] = {
+                    0.25 * (1 - xi) * (1 - eta),
+                    0.25 * (1 + xi) * (1 - eta),
+                    0.25 * (1 + xi) * (1 + eta),
+                    0.25 * (1 - xi) * (1 + eta)
+                };
+
+                double J[2][2];
+                compute_jacobian(element, xi, eta, J);
+                double detJ = compute_jacobian_determinant(J);
+
+                for (int k = 0; k < 4; ++k) {
+                    for (int l = 0; l < 4; ++l) {
+                        C_local[k * 4 + l] += density * specific_heat * N[k] * N[l] * detJ * weight;
+                    }
+                }
+            }
+        }
+
+        local_C_matrices.push_back(C_local);
+
+        cout << "Local C matrix for element:" << endl;
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                cout << C_local[i * 4 + j] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+}
+
+void FEMSolver::aggregate_C_matrix(vector<vector<double>>& C_global, int nodes_num) const {
+    C_global.assign(nodes_num, vector<double>(nodes_num, 0.0));
+    const auto& elements = grid.get_elements();
+
+    for (size_t elem_idx = 0; elem_idx < elements.size(); ++elem_idx) {
+        const auto& element = elements[elem_idx];
+        const auto& C_local = local_C_matrices[elem_idx];
+        const auto& ID = element.get_ID();  
+
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                if (ID[i] < nodes_num && ID[j] < nodes_num) {
+                    C_global[ID[i]][ID[j]] += C_local[i * 4 + j];
+                } else {
+                    cerr << "Invalid global index: " << ID[i] << " or " << ID[j] << endl;
+                }
+            }
+        }
+    }
+
+    ofstream output_file("../Grid/results/global_C_matrix.txt");
+    if (output_file.is_open()) {
+        output_file << fixed << setprecision(5);
+        output_file << "Global C matrix:" << endl << endl;
+        for (const auto& row : C_global) {
+            for (const auto& value : row) {
+                output_file << value << " ";
+            }
+            output_file << endl;
+        }
+        output_file.close();
+    } else {
+        cerr << "Error opening file for global C matrix." << endl;
+    }
+
+    cout << "-----------------------------------" << endl;
+    cout << "Global C Matrix:" << endl;
+    for (const auto& row : C_global) {
+        for (const auto& value : row) {
+            cout << value << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
+void FEMSolver::simulate_time(vector<vector<double>>& H_global, vector<vector<double>>& C_global, vector<double>& P_global, vector<double>& t_initial, double time_step, double total_time) {
+    int num_nodes = H_global.size();
+    vector<double> t_current = t_initial; 
+    vector<double> t_next(num_nodes, 0.0);
+    vector<vector<double>> A(num_nodes, vector<double>(num_nodes, 0.0));
+    vector<double> b(num_nodes, 0.0);
+
+    ofstream output_file("../Grid/results/simulation_temperatures.txt");
+    if (!output_file.is_open()) {
+        cerr << "Error opening file for writing results." << endl;
+        return;
+    }
+    output_file << fixed << setprecision(5); 
+    output_file << "Simulation results:\n\n";
+
+    for (double time = 50.0; time <= total_time; time += time_step) {
+        output_file << "Time: " << time << " s\n";
+
+        for (int i = 0; i < num_nodes; ++i) {
+            for (int j = 0; j < num_nodes; ++j) {
+                A[i][j] = C_global[i][j] / time_step + H_global[i][j];
+            }
+        }
+
+        cout << "-----------------------------------" << endl;
+        cout << "Matrix [H] + [C]/dT at time: " << time << " s" << endl;
+        for (const auto& row : A) {
+            for (const auto& value : row) {
+                cout << fixed << setprecision(5) << value << " ";
+            }
+            cout << endl;
+        }
+
+        for (int i = 0; i < num_nodes; ++i) {
+            b[i] = P_global[i];
+            for (int j = 0; j < num_nodes; ++j) {
+                b[i] += C_global[i][j] * t_current[j] / time_step;
+            }
+        }
+
+        cout << "Vector P ([{P} + {[C]/dT}*{T0}]) at time: " << time << " s" << endl;
+        for (const auto& value : b) {
+            cout << fixed << setprecision(5) << value << " ";
+        }
+        cout << endl;
+
+        solve_system(A, b, t_next);
+
+        cout << "Temperatures:" << endl;
+        for (const auto& temp : t_next) {
+            cout << temp << " ";
+        }
+        cout << endl;
+
+        output_file << "Temperatures: ";
+        for (const auto& temp : t_next) {
+            output_file << temp << " ";
+        }
+        output_file << "\n";
+
+        double min_temp = *min_element(t_next.begin(), t_next.end());
+        double max_temp = *max_element(t_next.begin(), t_next.end());
+        cout << "Minimum Temperature: " << min_temp << endl;
+        cout << "Maximum Temperature: " << max_temp << endl;
+
+        output_file << "Minimum Temperature: " << min_temp << "\n";
+        output_file << "Maximum Temperature: " << max_temp << "\n\n";
+        t_current = t_next;
+    }
+    output_file.close();
 }
