@@ -26,15 +26,6 @@ FEMSolver::FEMSolver(Grid& grid, double alpha, double ambient_temperature) : gri
     calculate_local_Hbc_matrix(alpha);
 }
 
-void FEMSolver::display_matrix(vector<vector<double>>& matrix) {  
-    for (const auto& row : matrix) {
-        for (const auto& value : row) {
-            cout << value << " ";
-        }
-        cout << endl;
-    }
-}
-
 void FEMSolver::compute_jacobian(const Element& element, double xi, double eta, double J[2][2]) const {
     double dN_dxi[4] = {
         -0.25 * (1 - eta),  
@@ -51,12 +42,17 @@ void FEMSolver::compute_jacobian(const Element& element, double xi, double eta, 
     };
 
     const Node* nodes = element.get_nodes();
-    fill(&J[0][0], &J[0][0] + 4, 0.0);
-
+    
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            J[i][j] = 0.0;
+        }
+    }
+    
     for (int i = 0; i < 4; ++i) {
         J[0][0] += dN_dxi[i] * nodes[i].get_x();
-        J[0][1] += dN_deta[i] * nodes[i].get_x();
-        J[1][0] += dN_dxi[i] * nodes[i].get_y();
+        J[0][1] += dN_dxi[i] * nodes[i].get_y();
+        J[1][0] += dN_deta[i] * nodes[i].get_x();
         J[1][1] += dN_deta[i] * nodes[i].get_y();
     }
 }
@@ -130,10 +126,8 @@ void FEMSolver::calculate_Hbc_matrix(double conductivity) {
 
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < 4; ++j) {
-                H[i * 4 + j] = integrator.gauss_integration_2D(
-                    [this, &element, conductivity, i, j](double xi, double eta) -> double {
-                        return this->calculate_H_integrand(element, conductivity, i, j, xi, eta);
-                    }, 16, -1, 1, -1, 1);
+                H[i * 4 + j] = integrator.gauss_integration_2D( [this, &element, conductivity, i, j](double xi, double eta) -> double 
+                { return this->calculate_H_integrand(element, conductivity, i, j, xi, eta); }, 16, -1, 1, -1, 1);
             }
         }
 
@@ -371,6 +365,10 @@ void FEMSolver::solve_system(vector<vector<double>>& H_global, vector<double>& P
         swap(b[i], b[max_row]);
 
         for (int j = i + 1; j < n; j++) {
+            if (A[i][i] == 0) {
+                cerr << "Error: Division by zero detected in row " << i << endl;
+                return;
+            }
             double factor = A[j][i] / A[i][i];
             for (int k = i; k < n; k++) {
                 A[j][k] -= factor * A[i][k];
@@ -518,10 +516,10 @@ void FEMSolver::simulate_time(vector<vector<double>>& H_global, vector<vector<do
         cerr << "Error opening file for writing results." << endl;
         return;
     }
-    output_file << fixed << setprecision(5); 
+    output_file << fixed << setprecision(13); 
     output_file << "Simulation results:\n\n";
 
-    for (double time = 50.0; time <= total_time; time += time_step) {
+    for (double time = time_step; time <= total_time; time += time_step) {
         output_file << "Time: " << time << " s\n";
 
         for (int i = 0; i < num_nodes; ++i) {
@@ -554,17 +552,6 @@ void FEMSolver::simulate_time(vector<vector<double>>& H_global, vector<vector<do
 
         solve_system(A, b, t_next);
 
-        cout << "Temperatures:" << endl;
-        for (const auto& temp : t_next) {
-            cout << temp << " ";
-        }
-        cout << endl;
-
-        output_file << "Temperatures: ";
-        for (const auto& temp : t_next) {
-            output_file << temp << " ";
-        }
-        output_file << "\n";
 
         double min_temp = *min_element(t_next.begin(), t_next.end());
         double max_temp = *max_element(t_next.begin(), t_next.end());

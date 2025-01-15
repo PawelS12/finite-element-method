@@ -26,8 +26,7 @@ void GlobalData::read_file() {
             throw runtime_error("File: data.txt not found.");
         }
 
-        if (!(data_file >> simulation_time >> simulation_step_time >> conductivity >> alfa >> ambient_temp
-                       >> initial_temp >> density >> specific_heat >> nN >> nE >> nH >> nW >> H >> W)) {
+        if (!(data_file >> simulation_time >> simulation_step_time >> conductivity >> alfa >> ambient_temp >> initial_temp >> density >> specific_heat >> nN >> nE >> nH >> nW >> H >> W)) {
             throw runtime_error("Error reading data from file: data.txt");
         }
 
