@@ -47,7 +47,7 @@ The simulation follows these steps:
    - **Gaussian Elimination** for solving system equations
 
 ## Dependencies
-- Standard C++ compiler (GCC, Clang, or MSVC)
+- Standard C++ compiler
 - C++ Standard Library
 
 ## Compilation & Execution
