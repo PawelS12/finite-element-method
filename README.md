@@ -20,7 +20,7 @@ GRID/
 │   ├── Grid.cpp
 │   ├── Integration.cpp
 │   ├── FEMSolver.cpp
-│   └── main.c
+│   └── main.cpp
 ├── data/           # Input data for simulation
 │   ├── data.txt
 │   └── xy_nodes.txt
